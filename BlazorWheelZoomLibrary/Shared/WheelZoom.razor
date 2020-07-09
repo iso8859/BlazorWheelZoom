@@ -113,7 +113,6 @@
         Y.ComputeOffset(poxY, e.ClientY);
         // We want this newPos point under the mouse
         UpdateStyle();
-        StateHasChanged();
         return Task.CompletedTask;
     }
 
@@ -130,7 +129,6 @@
         await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.capturePointer", imgElement, e.PointerId);
         await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.setFocus", imgElement);
         UpdateStyle();
-        StateHasChanged();
     }
 
     async Task PointerUp(PointerEventArgs e)
@@ -138,7 +136,6 @@
         mouseDown = false;
         await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.releasePointer", imgElement, e.PointerId);
         UpdateStyle();
-        StateHasChanged();
     }
 
     Task PointerMove(PointerEventArgs e)
@@ -148,7 +145,6 @@
             X.SetViewOffset(mouseDownImageX + e.ClientX - mouseDownX);
             Y.SetViewOffset(mouseDownImageY + e.ClientY - mouseDownY);
             UpdateStyle();
-            StateHasChanged();
         }
         return Task.CompletedTask;
     }
