@@ -1,0 +1,150 @@
+﻿@using Blazor
+@inject IJSRuntime JSRuntime
+
+<p>@backgroundSizeX</p>
+<p>@viewWidth</p>
+
+<img @ref=imgElement
+     @onpointerdown=PointerDown @onpointerdown:preventDefault
+     @onpointerup=PointerUp @onpointerup:preventDefault
+     @onpointermove=PointerMove @onpointermove:preventDefault
+     @onwheel=OnWheel @onwheel:stopPropagation
+     @attributes=AllOtherAttributes
+     src="@src"
+     />
+
+@code {
+    ElementReference imgElement;
+
+    [Parameter]
+    public string Image { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AllOtherAttributes { get; set; }
+
+    public string src { get; set; }
+
+    double imageSizeX, imageSizeY;
+    double currentScale = 1;
+    double backgroundOffsetX, backgroundOffsetY;
+    double backgroundSizeX, backgroundSizeY;
+    double viewWidth, viewHeight;
+
+    public class JSRect
+    {
+        public double x { get; set; }
+        public double y { get; set; }
+        public double width { get; set; }
+        public double height { get; set; }
+
+        public static JSRect Parse(System.Text.Json.JsonElement input)
+        {
+            return new JSRect()
+            {
+                x = input.GetProperty("x").GetDouble(),
+                y = input.GetProperty("y").GetDouble(),
+                width = input.GetProperty("width").GetDouble(),
+                height = input.GetProperty("height").GetDouble()
+            };
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        src = Image; // Set real image so naturalWidth and naturalHeight works
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitAsync();
+            StateHasChanged();
+        }
+    }
+
+    async Task InitAsync()
+    {
+        if (AllOtherAttributes == null)
+            AllOtherAttributes = new Dictionary<string, object>();
+        HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
+        HtmlStyleHelper style = a.style;
+        style.SetOne("background-image", $"url(\"{Image}\")");
+        style.SetOne("background-repeat", "no-repeat");
+
+        imageSizeX = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalWidth", imgElement);
+        imageSizeY = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalHeight", imgElement);
+        backgroundSizeX = imageSizeX;
+        backgroundSizeY = imageSizeY;
+        string svg = $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{imageSizeX}\" height=\"{imageSizeY}\" />";
+        src = "data:image/svg+xml;base64," + Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(svg));
+        a.style = style;
+        AllOtherAttributes = a;
+    }
+
+    void UpdateStyle()
+    {
+        HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
+        HtmlStyleHelper style = a.style;
+        style.setCoord("background-size", new Coord(backgroundSizeX, backgroundSizeY));
+        style.setCoord("background-position", new Coord(backgroundOffsetX, backgroundOffsetY));
+        style.SetOne("cursor", mouseDown ? "grab" : "default");
+        a.style = style;
+        AllOtherAttributes = a;
+    }
+
+    Task OnWheel(WheelEventArgs e)
+    {
+        if (e.DeltaY > 0)
+            currentScale = currentScale * 1.1;
+        else if (e.DeltaY < 0)
+            currentScale = currentScale / 1.1;
+        currentScale = Math.Max(0.1, Math.Min(10, currentScale));
+        backgroundSizeX = imageSizeX * currentScale;
+        backgroundSizeY = imageSizeY * currentScale;
+        UpdateStyle();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    bool mouseDown = false;
+    double mouseDownX, mouseDownY;
+    double mouseDownImageX, mouseDownImageY;
+    async Task PointerDown(PointerEventArgs e)
+    {
+        mouseDown = true;
+        mouseDownX = e.ClientX;
+        mouseDownY = e.ClientY;
+        mouseDownImageX = backgroundOffsetX;
+        mouseDownImageY = backgroundOffsetY;
+        await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.capturePointer", imgElement, e.PointerId);
+        await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.setFocus", imgElement);
+        UpdateStyle();
+        StateHasChanged();
+    }
+
+    async Task PointerUp(PointerEventArgs e)
+    {
+        mouseDown = false;
+        await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.releasePointer", imgElement, e.PointerId);
+        UpdateStyle();
+        StateHasChanged();
+    }
+
+    async Task PointerMove(PointerEventArgs e)
+    {
+        if (mouseDown)
+        {
+            var boundingRect = JSRect.Parse(await JSRuntime.InvokeAsync<System.Text.Json.JsonElement>("WheelZoomJsFunctions.boundingRect", imgElement));
+            double deltaX = e.ClientX - mouseDownX;
+            double deltaY = e.ClientY - mouseDownY;
+            viewWidth = Math.Min(backgroundSizeX, backgroundSizeX - boundingRect.width);
+            viewHeight = Math.Min(backgroundSizeY, backgroundSizeY - boundingRect.height);
+            backgroundOffsetX = Math.Max(-viewWidth, Math.Min(mouseDownImageX + deltaX, 0));
+            backgroundOffsetY = Math.Max(-viewHeight, Math.Min(mouseDownImageY + deltaY, 0));
+            UpdateStyle();
+            StateHasChanged();
+        }
+    }
+
+}
