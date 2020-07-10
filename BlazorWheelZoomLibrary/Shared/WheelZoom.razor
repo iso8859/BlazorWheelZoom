@@ -1,7 +1,7 @@
 ﻿@using Blazor
 @inject IJSRuntime JSRuntime
-<p>@X</p>
-<p>@Y</p>
+@*<p>@X</p>
+<p>@Y</p>*@
 
 <img @ref=imgElement
      @onpointerdown=PointerDown @onpointerdown:preventDefault
@@ -58,6 +58,8 @@
     {
         if (firstRender)
         {
+            if (System.Runtime.InteropServices.RuntimeInformation.OSDescription=="web") // Wasm need a delay here
+                await Task.Delay(100);
             await InitAsync();
             UpdateStyle();
             StateHasChanged();
