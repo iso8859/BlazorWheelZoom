@@ -5,6 +5,8 @@ Zoom and move image with Blazor - minimal javascript
 
 **Demo site** http://blazorwheelzoom.m4f.eu/
 
+Add nuget package ```iso8859.blazor.wheel-zoom```
+
 server side blazor|webassembly blazor
 ---|---
 in Pages/_Host.chtml|in wwwroot/index.html
