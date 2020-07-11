@@ -1,6 +1,8 @@
 # BlazorWheelZoom
 Zoom and move image with Blazor - minimal javascript
 
+![animation](anim.gif)
+
 **Demo site** http://blazorwheelzoom.m4f.eu/
 
 server side blazor|webassembly blazor
@@ -14,15 +16,14 @@ in Pages/_Host.chtml|in wwwroot/index.html
 </body>
 ```
 
-for both
+for both in _Imports.razor
 ```
 @using BlazorWheelZoomLibrary.Shared
 ```
 
 
+**Use the component in your razor page**
 
-
-And in your razor page
 ```HTML
 <WheelZoom Image="/mire.png" width="500" height="500" />
 ```
