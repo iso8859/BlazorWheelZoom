@@ -1,9 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <PackageId>wheel-zoom-blazor</PackageId>
+    <PackageId>iso8859.blazor.wheel-zoom</PackageId>
+    <Authors>Remi THOMAS</Authors>
+    <Description>Zoom and move image with Blazor - minimal javascript</Description>
+    <PackageProjectUrl>https://github.com/iso8859/BlazorWheelZoom</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/iso8859/BlazorWheelZoom</RepositoryUrl>
+    <PackageTags>blazor</PackageTags>
   </PropertyGroup>
 
 
