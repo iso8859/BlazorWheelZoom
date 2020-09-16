@@ -17,6 +17,16 @@
     [Parameter]
     public string Image { get; set; }
 
+    [Parameter]
+    public double? ImageWidth { get; set; }
+    [Parameter]
+    public EventCallback<double?> ImageWithChanged { get; set; }
+
+    [Parameter]
+    public double? ImageHeight { get; set; }
+    [Parameter]
+    public EventCallback<double?> ImageHeightChanged { get; set; }
+
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> AllOtherAttributes { get; set; }
 
@@ -66,18 +76,79 @@
         }
     }
 
+    public async Task RefreshAsync(string newImagePath = null)
+    {
+        if (!string.IsNullOrEmpty(newImagePath))
+        {
+            Image = newImagePath;
+            ImageWidth = null;
+            await ImageWithChanged.InvokeAsync(null);
+            ImageHeight = null;
+            await ImageHeightChanged.InvokeAsync(null);
+        }
+        await InitAsync();
+        UpdateStyle();
+        StateHasChanged();
+    }
+
+    public async Task RefreshAsync(string newImagePath, double width, double height)
+    {
+        if (!string.IsNullOrEmpty(newImagePath))
+        {
+            Image = newImagePath;
+            ImageWidth = width;
+            await ImageWithChanged.InvokeAsync(width);
+            ImageHeight = height;
+            await ImageHeightChanged.InvokeAsync(height);
+        }
+        else
+        {
+            Image = null;
+            ImageWidth = null;
+            await ImageWithChanged.InvokeAsync(null);
+            ImageHeight = null;
+            await ImageHeightChanged.InvokeAsync(null);
+        }
+        await InitAsync();
+        UpdateStyle();
+        StateHasChanged();
+    }
+
     async Task InitAsync()
     {
         if (AllOtherAttributes == null)
             AllOtherAttributes = new Dictionary<string, object>();
         HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
         HtmlStyleHelper style = a.style;
-        style.SetOne("background-image", $"url(\"{Image}\")");
-        style.SetOne("background-repeat", "no-repeat");
+        if (!string.IsNullOrEmpty(Image))
+        {
+            if (Image.StartsWith("data:"))
+                style.SetOne("background-image", $"url({Image})");
+            else
+                style.SetOne("background-image", $"url(\"{Image}\")");
+            style.SetOne("background-repeat", "no-repeat");
+        }
 
         var boundingRect = JSRect.Parse(await JSRuntime.InvokeAsync<System.Text.Json.JsonElement>("WheelZoomJsFunctions.boundingRect", imgElement));
-        var imageSizeX = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalWidth", imgElement);
-        var imageSizeY = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalHeight", imgElement);
+        double imageSizeX, imageSizeY;
+        if (ImageWidth.HasValue)
+            imageSizeX = ImageWidth.Value;
+        else
+        {
+            imageSizeX = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalWidth", imgElement);
+            ImageWidth = imageSizeX;
+            await ImageWithChanged.InvokeAsync(imageSizeX);
+        }
+
+        if (ImageHeight.HasValue)
+            imageSizeY = ImageHeight.Value;
+        else
+        {
+            imageSizeY = await JSRuntime.InvokeAsync<double>("WheelZoomJsFunctions.naturalHeight", imgElement);
+            ImageHeight = imageSizeY;
+            await ImageHeightChanged.InvokeAsync(imageSizeY);
+        }
+
         X = new ScaleManager() { DocSize = imageSizeX, ViewSize = boundingRect.width };
         Y = new ScaleManager() { DocSize = imageSizeY, ViewSize = boundingRect.height };
         X.SetScale(currentScale);

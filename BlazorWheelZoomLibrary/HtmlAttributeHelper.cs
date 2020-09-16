@@ -70,11 +70,20 @@ namespace Blazor
         {
             HtmlStyleHelper result = new HtmlStyleHelper();
             string[] items = source.Split(';');
+            string lastItem = "";
             foreach (string item in items)
             {
                 int idx = item.IndexOf(':');
                 if (idx != -1)
-                    result[item.Substring(0, idx).Trim()] = item.Substring(idx + 1).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(_ => _.Trim()).ToList();
+                {
+                    lastItem = item.Substring(0, idx).Trim();
+                    result[lastItem] = item.Substring(idx + 1).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(_ => _.Trim()).ToList();
+                }
+                else
+                {
+                    if (item.StartsWith("base64,") && !string.IsNullOrEmpty(lastItem))
+                        result[lastItem][0] += ";" + item;
+                }
             }
             return result;
         }
