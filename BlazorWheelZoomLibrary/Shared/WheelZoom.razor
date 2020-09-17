@@ -8,6 +8,7 @@
      @onpointerup=PointerUp @onpointerup:preventDefault
      @onpointermove=PointerMove @onpointermove:preventDefault
      @onwheel=OnWheel @onwheel:stopPropagation
+     @onload="ImageLoaded"
      @attributes=AllOtherAttributes
      src="@src" />
 
@@ -64,16 +65,12 @@
         src = Image; // Set real image so naturalWidth and naturalHeight works
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // This event survive when image his effectively loaded and we can get size infos
+    async Task ImageLoaded(ProgressEventArgs e)
     {
-        if (firstRender)
-        {
-            if (System.Runtime.InteropServices.RuntimeInformation.OSDescription=="web") // Wasm need a delay here
-                await Task.Delay(100);
-            await InitAsync();
-            UpdateStyle();
-            StateHasChanged();
-        }
+        await InitSize();
+        UpdateStyle();
+        StateHasChanged();
     }
 
     public async Task RefreshAsync(string newImagePath = null)
@@ -86,8 +83,7 @@
             ImageHeight = null;
             await ImageHeightChanged.InvokeAsync(null);
         }
-        await InitAsync();
-        UpdateStyle();
+        InitImage();
         StateHasChanged();
     }
 
@@ -109,12 +105,27 @@
             ImageHeight = null;
             await ImageHeightChanged.InvokeAsync(null);
         }
-        await InitAsync();
-        UpdateStyle();
+        InitImage();
         StateHasChanged();
     }
 
-    async Task InitAsync()
+    // First load the image putting it in src so we can't get back his size
+    void InitImage()
+    {
+        // Put the real image here to get size infos
+        src = Image;
+        // Remove backgoud image
+        if (AllOtherAttributes == null)
+            AllOtherAttributes = new Dictionary<string, object>();
+        HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
+        HtmlStyleHelper style = a.style;
+        style.Remove("background-image");
+        a.style = style;
+        AllOtherAttributes = a;
+    }
+
+    // Then change background-image and src image, compute size
+    async Task InitSize()
     {
         if (AllOtherAttributes == null)
             AllOtherAttributes = new Dictionary<string, object>();
@@ -128,7 +139,6 @@
                 style.SetOne("background-image", $"url(\"{Image}\")");
             style.SetOne("background-repeat", "no-repeat");
         }
-
         var boundingRect = JSRect.Parse(await JSRuntime.InvokeAsync<System.Text.Json.JsonElement>("WheelZoomJsFunctions.boundingRect", imgElement));
         double imageSizeX, imageSizeY;
         if (ImageWidth.HasValue)
@@ -153,6 +163,7 @@
         Y = new ScaleManager() { DocSize = imageSizeY, ViewSize = boundingRect.height };
         X.SetScale(currentScale);
         Y.SetScale(currentScale);
+        // Create a transparent image with the same size
         string svg = $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{imageSizeX}\" height=\"{imageSizeY}\" />";
         src = "data:image/svg+xml;base64," + Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(svg));
         a.style = style;
