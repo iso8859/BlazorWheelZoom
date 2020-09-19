@@ -7,7 +7,7 @@
      @onpointerdown=PointerDown @onpointerdown:preventDefault
      @onpointerup=PointerUp @onpointerup:preventDefault
      @onpointermove=PointerMove @onpointermove:preventDefault
-     @onwheel=OnWheel @onwheel:stopPropagation
+     @onwheel=OnWheel @onwheel:stopPropagation @onwheel:preventDefault
      @onload="ImageLoaded"
      @attributes=AllOtherAttributes
      src="@src" />
@@ -70,7 +70,7 @@
     {
         await InitSize();
         UpdateStyle();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task RefreshAsync(string newImagePath = null)
@@ -84,7 +84,7 @@
             await ImageHeightChanged.InvokeAsync(null);
         }
         InitImage();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task RefreshAsync(string newImagePath, double width, double height)
@@ -106,7 +106,7 @@
             await ImageHeightChanged.InvokeAsync(null);
         }
         InitImage();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     // First load the image putting it in src so we can't get back his size
