@@ -13,23 +13,23 @@
      src="@src" />
 
 @code {
-    ElementReference imgElement;
+        ElementReference imgElement;
 
-    [Parameter]
-    public string Image { get; set; }
+        [Parameter]
+        public string Image { get; set; }
 
-    [Parameter]
-    public double? ImageWidth { get; set; }
-    [Parameter]
-    public EventCallback<double?> ImageWithChanged { get; set; }
+        [Parameter]
+        public double? ImageWidth { get; set; }
+        [Parameter]
+        public EventCallback<double?> ImageWithChanged { get; set; }
 
-    [Parameter]
-    public double? ImageHeight { get; set; }
-    [Parameter]
-    public EventCallback<double?> ImageHeightChanged { get; set; }
+        [Parameter]
+        public double? ImageHeight { get; set; }
+        [Parameter]
+        public EventCallback<double?> ImageHeightChanged { get; set; }
 
-    [Parameter(CaptureUnmatchedValues = true)]
-    public Dictionary<string, object> AllOtherAttributes { get; set; }
+        [Parameter(CaptureUnmatchedValues = true)]
+        public Dictionary<string, object> AllOtherAttributes { get; set; }
 
     public string src { get; set; }
 
@@ -172,31 +172,37 @@
 
     void UpdateStyle()
     {
-        HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
-        HtmlStyleHelper style = a.style;
-        style.setCoord("background-size", new Coord(X.ActualViewSize, Y.ActualViewSize));
-        style.setCoord("background-position", new Coord(X.ViewOffset, Y.ViewOffset));
-        style.SetOne("cursor", mouseDown ? "grab" : "default");
-        a.style = style;
-        AllOtherAttributes = a;
+        if (X != null && Y != null)
+        {
+            HtmlAttributeHelper a = new HtmlAttributeHelper(AllOtherAttributes);
+            HtmlStyleHelper style = a.style;
+            style.setCoord("background-size", new Coord(X.ActualViewSize, Y.ActualViewSize));
+            style.setCoord("background-position", new Coord(X.ViewOffset, Y.ViewOffset));
+            style.SetOne("cursor", mouseDown ? "grab" : "default");
+            a.style = style;
+            AllOtherAttributes = a;
+        }
     }
 
     Task OnWheel(WheelEventArgs e)
     {
-        // Find position in the image at scale 1
-        double posX = X.ViewToDoc(e.ClientX);
-        double poxY = Y.ViewToDoc(e.ClientY);
-        if (e.DeltaY > 0)
-            currentScale = currentScale / 1.1;
-        else if (e.DeltaY < 0)
-            currentScale = currentScale * 1.1;
-        currentScale = Math.Max(0.1, Math.Min(10, currentScale));
-        X.SetScale(currentScale);
-        Y.SetScale(currentScale);
-        X.ComputeOffset(posX, e.ClientX);
-        Y.ComputeOffset(poxY, e.ClientY);
-        // We want this newPos point under the mouse
-        UpdateStyle();
+        if (X != null && Y != null)
+        {
+            // Find position in the image at scale 1
+            double posX = X.ViewToDoc(e.ClientX);
+            double poxY = Y.ViewToDoc(e.ClientY);
+            if (e.DeltaY > 0)
+                currentScale = currentScale / 1.1;
+            else if (e.DeltaY < 0)
+                currentScale = currentScale * 1.1;
+            currentScale = Math.Max(0.1, Math.Min(10, currentScale));
+            X.SetScale(currentScale);
+            Y.SetScale(currentScale);
+            X.ComputeOffset(posX, e.ClientX);
+            Y.ComputeOffset(poxY, e.ClientY);
+            // We want this newPos point under the mouse
+            UpdateStyle();
+        }
         return Task.CompletedTask;
     }
 
@@ -205,14 +211,17 @@
     double mouseDownImageX, mouseDownImageY;
     async Task PointerDown(PointerEventArgs e)
     {
-        mouseDown = true;
-        mouseDownX = e.ClientX;
-        mouseDownY = e.ClientY;
-        mouseDownImageX = X.ViewOffset;
-        mouseDownImageY = Y.ViewOffset;
-        await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.capturePointer", imgElement, e.PointerId);
-        await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.setFocus", imgElement);
-        UpdateStyle();
+        if (X != null && Y != null)
+        {
+            mouseDown = true;
+            mouseDownX = e.ClientX;
+            mouseDownY = e.ClientY;
+            mouseDownImageX = X.ViewOffset;
+            mouseDownImageY = Y.ViewOffset;
+            await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.capturePointer", imgElement, e.PointerId);
+            await JSRuntime.InvokeVoidAsync("WheelZoomJsFunctions.setFocus", imgElement);
+            UpdateStyle();
+        }
     }
 
     async Task PointerUp(PointerEventArgs e)
@@ -224,7 +233,7 @@
 
     Task PointerMove(PointerEventArgs e)
     {
-        if (mouseDown)
+        if (mouseDown && X != null && Y != null)
         {
             X.SetViewOffset(mouseDownImageX + e.ClientX - mouseDownX);
             Y.SetViewOffset(mouseDownImageY + e.ClientY - mouseDownY);
