@@ -133,10 +133,7 @@
         HtmlStyleHelper style = a.style;
         if (!string.IsNullOrEmpty(Image))
         {
-            if (Image.StartsWith("data:"))
-                style.SetOne("background-image", $"url({Image})");
-            else
-                style.SetOne("background-image", $"url(\"{Image}\")");
+            style.SetOne("background-image", $"url(\"{Image}\")");
             style.SetOne("background-repeat", "no-repeat");
         }
         var boundingRect = JSRect.Parse(await JSRuntime.InvokeAsync<System.Text.Json.JsonElement>("WheelZoomJsFunctions.boundingRect", imgElement));
