@@ -6,7 +6,7 @@
 <div style="border: thin solid green; width: 510px; height: 510px; padding: 5px;">
     <WheelZoom Image="/mire.png" width="500" height="500" />
 </div>
-<div style="border: thin solid green; width: 510px; height: 510px; padding: 5px;">
+@*<div style="border: thin solid green; width: 510px; height: 510px; padding: 5px;">
     <WheelZoom Image="@($"data:image/png;base64, {image64}")" width="500" height="500" />
 </div>
 
@@ -17,4 +17,4 @@
     {
         image64 = System.Convert.ToBase64String(System.IO.File.ReadAllBytes("wwwroot/mire.png"));
     }
-}
+}*@

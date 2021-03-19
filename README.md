@@ -3,7 +3,7 @@ Zoom and move image with Blazor - minimal javascript
 
 ![animation](anim.gif)
 
-**Demo site** http://blazorwheelzoom.m4f.eu/
+**Demo site** https://blazorwheelzoom.azurewebsites.net/
 
 Add nuget package ```iso8859.blazor.wheel-zoom```
 
