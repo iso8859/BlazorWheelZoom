@@ -9,6 +9,8 @@
     <PackageProjectUrl>https://github.com/iso8859/BlazorWheelZoom</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iso8859/BlazorWheelZoom</RepositoryUrl>
     <PackageTags>blazor</PackageTags>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
   </PropertyGroup>
 
 
