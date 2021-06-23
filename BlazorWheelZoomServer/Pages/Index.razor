@@ -4,17 +4,19 @@
 <p>User mouse wheel and drag image to move</p>
 
 <div style="border: thin solid green; width: 510px; height: 510px; padding: 5px;">
-    <WheelZoom Image="/mire.png" width="500" height="500" />
+    <WheelZoom Image="/mire.png" width="500" height="500" Rectangles="@rects" />
 </div>
 @*<div style="border: thin solid green; width: 510px; height: 510px; padding: 5px;">
     <WheelZoom Image="@($"data:image/png;base64, {image64}")" width="500" height="500" />
-</div>
+</div>*@
 
 @code{
-    string image64;
+
+    List<BlazorWheelZoomLibrary.Rectangle> rects = new List<BlazorWheelZoomLibrary.Rectangle>();
 
     protected override void OnInitialized()
     {
-        image64 = System.Convert.ToBase64String(System.IO.File.ReadAllBytes("wwwroot/mire.png"));
+        rects.Add(new BlazorWheelZoomLibrary.Rectangle() { left = 10, top = 10, right = 110, bottom = 110, color = "#FF0000", fill = "#FF0000", fill_opacity = "30%" });
+        rects.Add(new BlazorWheelZoomLibrary.Rectangle() { left = 200, top = 200, right = 350, bottom = 350, color = "#FFFF00", fill = "#FFFF00", fill_opacity = "30%" });
     }
-}*@
+}

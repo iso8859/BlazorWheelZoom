@@ -1,35 +1,70 @@
 ﻿@using Blazor
 @inject IJSRuntime JSRuntime
 @*<p>@X</p>
-<p>@Y</p>*@
+    <p>@Y</p>*@
 
-<img @ref=imgElement
-     @onpointerdown=PointerDown @onpointerdown:preventDefault
-     @onpointerup=PointerUp @onpointerup:preventDefault
-     @onpointermove=PointerMove @onpointermove:preventDefault
-     @onwheel=OnWheel @onwheel:stopPropagation @onwheel:preventDefault
-     @onload="ImageLoaded"
-     @attributes=AllOtherAttributes
-     src="@src" />
+<div class="wheelzoom" @onpointerdown=PointerDown @onpointerdown:preventDefault
+             @onpointerup=PointerUp @onpointerup:preventDefault
+             @onpointermove=PointerMove @onpointermove:preventDefault
+             @onwheel=OnWheel @onwheel:stopPropagation @onwheel:preventDefault>
+    <div class="wheelzoom-container">
+        <img @ref=imgElement
+             @onpointerdown=PointerDown @onpointerdown:preventDefault
+             @onpointerup=PointerUp @onpointerup:preventDefault
+             @onpointermove=PointerMove @onpointermove:preventDefault
+             @onwheel=OnWheel @onwheel:stopPropagation @onwheel:preventDefault
+             @onload="ImageLoaded"
+             @attributes=AllOtherAttributes
+             src="@src" />
+    </div>
 
+    @if (Rectangles != null && Rectangles.Count > 0 && X != null && Y != null)
+    {
+        double xoffset = 0;
+        @if (X != null)
+            xoffset = X.ViewOffset;
+        double yoffset = 0;
+        if (Y != null)
+            yoffset = Y.ViewOffset;
+
+<div class="wheelzoom-container">
+    @*<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" transform="translate(@(xoffset.ToStringInvariant()), @(yoffset.ToStringInvariant()))" width="100%" height="100%">*@
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%">
+            <defs>
+                <clipPath id="clip-path">
+                    <rect width="100%" height="100%" />
+                </clipPath>
+            </defs>
+            @foreach (var rect in Rectangles)
+            {
+                @((MarkupString)rect.GetSVG(xoffset, yoffset, currentScale))
+            }
+        </svg>
+</div>
+    }
+
+</div>
 @code {
-        ElementReference imgElement;
+    ElementReference imgElement;
 
-        [Parameter]
-        public string Image { get; set; }
+    [Parameter]
+    public string Image { get; set; }
 
-        [Parameter]
-        public double? ImageWidth { get; set; }
-        [Parameter]
-        public EventCallback<double?> ImageWithChanged { get; set; }
+    [Parameter]
+    public double? ImageWidth { get; set; }
+    [Parameter]
+    public EventCallback<double?> ImageWithChanged { get; set; }
 
-        [Parameter]
-        public double? ImageHeight { get; set; }
-        [Parameter]
-        public EventCallback<double?> ImageHeightChanged { get; set; }
+    [Parameter]
+    public double? ImageHeight { get; set; }
+    [Parameter]
+    public EventCallback<double?> ImageHeightChanged { get; set; }
 
-        [Parameter(CaptureUnmatchedValues = true)]
-        public Dictionary<string, object> AllOtherAttributes { get; set; }
+    [Parameter]
+    public List<Rectangle> Rectangles { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AllOtherAttributes { get; set; }
 
     public string src { get; set; }
 
@@ -238,5 +273,4 @@
         }
         return Task.CompletedTask;
     }
-
 }
