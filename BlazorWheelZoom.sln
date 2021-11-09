@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWheelZoomLibrary", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWheelZoomServer", "BlazorWheelZoomServer\BlazorWheelZoomServer.csproj", "{522EA93F-A45B-4929-BBB7-930FCEDF6FB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWheelZoomWA", "BlazorWheelZoomWA\BlazorWheelZoomWA.csproj", "{D351D656-8CAB-48B0-BF9D-E4412ADA8D24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{522EA93F-A45B-4929-BBB7-930FCEDF6FB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{522EA93F-A45B-4929-BBB7-930FCEDF6FB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{522EA93F-A45B-4929-BBB7-930FCEDF6FB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D351D656-8CAB-48B0-BF9D-E4412ADA8D24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D351D656-8CAB-48B0-BF9D-E4412ADA8D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D351D656-8CAB-48B0-BF9D-E4412ADA8D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D351D656-8CAB-48B0-BF9D-E4412ADA8D24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

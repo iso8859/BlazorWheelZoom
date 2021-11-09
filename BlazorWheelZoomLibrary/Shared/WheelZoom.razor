@@ -13,7 +13,7 @@
              @onpointerup=PointerUp @onpointerup:preventDefault
              @onpointermove=PointerMove @onpointermove:preventDefault
              @onwheel=OnWheel @onwheel:stopPropagation @onwheel:preventDefault
-             @onload="ImageLoaded"
+             @onload="@(async (e)=> await ImageLoaded(e))"
              @attributes=AllOtherAttributes
              src="@src" />
     </div>
@@ -103,9 +103,9 @@
     // This event survive when image his effectively loaded and we can get size infos
     async Task ImageLoaded(ProgressEventArgs e)
     {
-        await InitSize();
+        await InitSize().ConfigureAwait(false);
         UpdateStyle();
-        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     public async Task RefreshAsync(string newImagePath = null)
