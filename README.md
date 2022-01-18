@@ -14,7 +14,7 @@ in Pages/_Host.chtml|in wwwroot/index.html
 ```HTML
 <body>
 ...
-<script src="_content/wheel-zoom-blazor/wheelzoomblazor.js"></script>
+<script src="_content/iso8859.blazor.wheel-zoom/wheelzoomblazor.js"></script>
 </body>
 ```
 
